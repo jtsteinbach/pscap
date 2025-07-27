@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-#   PScap                  v1.4
-#   License            MIT 2025
-#   Author         jts.gg/pscap
+# ──────────────────────────────
+#   PScap                v1.4.0
+#   Author              jts.gg/
+#   License   r2.jts.gg/license
+# ──────────────────────────────
 
 import os
 import sys
@@ -10,10 +12,12 @@ import psutil
 from scapy.all import sniff
 from scapy.utils import PcapWriter
 
+# ────── logging setup ──────
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s", level=logging.INFO
 )
 
+# ────── help and admin check ──────
 def usage():
     print("""
   PScap v1.4    Capture network traffic per PID/ProcessName
@@ -31,7 +35,6 @@ Options:
 """)
     sys.exit(1)
 
-
 def is_admin():
     try:
         if os.name == 'nt':
@@ -41,12 +44,11 @@ def is_admin():
     except:
         return False
 
-
+# ────── capture process ──────
 def list_processes():
     for p in psutil.process_iter(['pid','name']):
         nm = p.info['name'] or ''
         print(f"{p.info['pid']:>6}  {nm}")
-
 
 def parse_targets(s):
     pids, names = set(), []
@@ -71,7 +73,6 @@ def parse_targets(s):
                 logging.error(f"No process named '{nm}' found.")
     return sorted(pids)
 
-
 def get_ports(pids):
     ports = set()
     for pid in pids:
@@ -86,7 +87,6 @@ def get_ports(pids):
             logging.warning(f"PID {pid} disappeared; skipping.")
     return ports
 
-
 def build_bpf(ports, blacklist):
     if not ports:
         return None
@@ -100,7 +100,7 @@ def build_bpf(ports, blacklist):
         bpf = f"({bpf}) and not ({excl})"
     return bpf
 
-
+# ────── script handling ──────
 def main():
     do_list  = False
     targets  = None
@@ -169,6 +169,7 @@ def main():
     finally:
         writer.close()
         logging.info(f"Capture saved: {out}")
-
+        
+# ────── entry point ──────
 if __name__=='__main__':
     main()
